@@ -1,4 +1,4 @@
-#+TITLE: A Python crash course on Org-babel
+#+TITLE: A Python interactive course on Org-babel
 #+Date: [2020-12-18 ven.]
 #+Author: Philippe Estival
 #+email: [[mailto:phil.estival@free.fr]]
@@ -12,31 +12,30 @@ Beginners can read the tutorial and the guide
 https://docs.python.org/3/using
 https://docs.python.org/3.6/tutorial
 
-The present guide is a quick introduction, turning
-mostly into a collection of code snippets.
+They can also dig into the present one.
+This is a guide for a quick introduction
+with a collection of code snippets.
 
 It features some of interactions =org-babel= provides
 over code source blocks.
-It's written with Emacs 26.3 and Org-mode 9.3.6
+It was written with Emacs 26.3 and Org-mode 9.3.6
 running on Debian 9 (stretch).
 
-#+call: org-version
-#+RESULTS: org-version
-: 9.4.6
+Present configuration is :
 
+#+call: org-version()
+#+RESULTS:
+: 9.5
 
-#+call:emacs-version
+#+call:emacs-version()
 #+results:
-: GNU Emacs 26.3 (build 1, x86_64-pc-linux-gnu, X toolkit, Xaw scroll bars)
-:  of 2020-10-22
+: GNU Emacs 28.0.50 (build 1, x86_64-pc-linux-gnu, X toolkit, cairo version 1.14.8, Xaw scroll bars)
+:  of 2021-08-04
 
-#+call: emacs-version
-#+results:
-: GNU Emacs 26.3 (build 1, x86_64-pc-linux-gnu, X toolkit, Xaw scroll bars)
-:  of 2020-10-22
+#+call:linux-version()
+#+RESULTS:
+: Linux 7d 4.9.0-16-amd64 #1 SMP Debian 4.9.272-2 (2021-07-19) x86_64 GNU/Linux
 
-
-#+call: org-version
 
 Typing =C-c= on the lines above will call and execute the code
 blocks declared below.  It also works when the cursor
@@ -52,11 +51,16 @@ is /on/ the code blocks.
 (org-version)
 #+end_src
 
-
 #+Name: emacs-version
 #+begin_src elisp
 (emacs-version)
 #+end_src
+
+#+Name: linux-version
+#+begin_src sh
+uname -a
+#+end_src
+
 
 Emacs will ask :
 Evaluate this (elisp or python) code block on your system ?
@@ -109,10 +113,15 @@ have been rewritten with it.
 
 Now you can check your python system interpreter
 #+name:python.sys.version
-#+begin_src python :results output
+#+begin_src python :results value 
   import sys
   return sys.version
 #+end_src
+
+#+RESULTS: python.sys.version
+: 3.9.1 (default, Jan 11 2021, 16:54:16) 
+: [GCC 6.3.0 20170516]
+
 
 
 If the answer is 2.7, you'll have to make one more
@@ -185,14 +194,14 @@ the return statement of the function,
 but with the return value of an
 expression given to the interpreter.
 
->>> def f(): return 256
+: >>> def f(): return 256
 
 Asking for the value of =f=
 will return a string representation
 of that function as its *type*, *name* and *memory address*.
 
->>> f
-<function f at 0x7fbdaace2e18>
+: >>> f
+: <function f at 0x7fbdaace2e18>
 
 And of course actually calling that function
 is expressed with =f()=.
@@ -207,15 +216,15 @@ Asking for an undefined variable /raise/ an error :
 We can initialize =y= with "text"
 and ask for it's length :
 
->>> y="text"
->>> len(y)
+: >>> y="text"
+: >>> len(y)
 
 then give the same variable another value
 of a different type and ask again for it's length.
 For instance :
 
->>> y=2
->>> len(2)
+: >>> y=2
+: >>> len(2)
 
 This time we would get a type error, with the explanation :
 =TypeError: object of type 'int' has no len()=
@@ -225,22 +234,23 @@ to the value it holds.
 
 The type of a variable can be returned by the =type= function.
 
->>> x=2.1
->>> type(x)
-<class 'float'>
+: >>> x=2.1
+: >>> type(x)
+: <class 'float'>
 
 which is the same as asking the type of the corresponding
 value (since a variable returns its value).
->>> type(2.1)
-<class 'float'>
+
+: >>> type(2.1)
+: <class 'float'>
 
 And what is the type of that? Well it's a type again,
 denoted through a =class= which is a reserved keyword,
 and which indicates the nature of the type construct:
 this is object oriented design.
 
->>> type(type(x))
-<class 'type'>
+: >>> type(type(x))
+: <class 'type'>
 
 
 Any variable, function, declared in the interpreter can be
@@ -286,7 +296,7 @@ https://docs.python.org/3.6/tutorial/controlflow.html#defining-functions
 
 #+begin_src python :results output
   def greetings(name):
-     """ And here we can describe what the function does
+     """ Here we can describe what the function does
      """
      print ("Hello %s" % name)
 
@@ -304,7 +314,7 @@ Every code block is an independent program
  x+=1
  #+end_src
 
-unless we enter session mode.
+unless we enter *session* mode.
 
  Session mode in python is slightly different from
  non-session mode, because in session mode you are talking
@@ -315,7 +325,7 @@ unless we enter session mode.
  mode. Besides, the return type is implicit, it is the last
  expression, as in an interactive shell.
 
-  [2020-12-19 sam. 17:35] Things could be different now in org 9.3
+  [2020-12-19 sam. 17:35] I don't know if this holds anymore since org 9.3
 
  #+begin_src python :session :results none :var x=3
  x
