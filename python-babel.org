@@ -1,1 +1,1461 @@
-/home/flint/org/python-babel.org
+#+TITLE: A Python crash course on Org-babel
+#+Date: [2020-12-18 ven.]
+#+Author: Philippe Estival
+#+email: [[mailto:phil.estival@free.fr]]
+
+* Intro
+To start on the right foot, one can read the begining
+of python.el (Python's flying circus support for Emacs),
+which provides =python-mode=, and relies on =comint=.
+
+Beginners can read the tutorial and the guide
+https://docs.python.org/3/using
+https://docs.python.org/3.6/tutorial
+
+The present guide is a quick introduction, turning
+mostly into a collection of code snippets.
+
+It features some of interactions =org-babel= provides
+over code source blocks.
+It's written with Emacs 26.3 and Org-mode 9.3.6
+running on Debian 9 (stretch).
+
+#+call: org-version
+#+RESULTS: org-version
+: 9.4.6
+
+
+#+call:emacs-version
+#+results:
+: GNU Emacs 26.3 (build 1, x86_64-pc-linux-gnu, X toolkit, Xaw scroll bars)
+:  of 2020-10-22
+
+#+call: emacs-version
+#+results:
+: GNU Emacs 26.3 (build 1, x86_64-pc-linux-gnu, X toolkit, Xaw scroll bars)
+:  of 2020-10-22
+
+
+#+call: org-version
+
+Typing =C-c= on the lines above will call and execute the code
+blocks declared below.  It also works when the cursor
+is /on/ the code blocks.
+
+   side-note : the proper way to write a call is with two
+   parentheses and eventually a named argument, for
+   instance, #+CALL: factorial(n=5), but see, I found a bug,
+   (or is it really one ?) and decided to go with it.
+
+#+Name: org-version
+#+begin_src elisp
+(org-version)
+#+end_src
+
+
+#+Name: emacs-version
+#+begin_src elisp
+(emacs-version)
+#+end_src
+
+Emacs will ask :
+Evaluate this (elisp or python) code block on your system ?
+
+Depending on your symbol definition,
+you'll have to type "yes" or "no", "y" or "n"
+the two latter comes by changing the following predicate
+
+   (fset 'yes-or-no-p 'y-or-n-p) ;  y/n instead of yes/no
+
+** configuring ob-python
+
+We will be running Python source blocks,
+that is, blocks starting with =#+begin_src python=
+For this we need to instruct org-babel about what
+languages can be evaluated in the buffer,
+and in what mode and/or languages.
+
+You can run the code block below,
+or set the variable :
+(customize-variable 'org-babel-load-languages)
+#+name: setup-ob-python
+#+begin_src elisp :results none
+(org-babel-do-load-languages
+    'org-babel-load-languages
+    '((python . t)))
+
+(defun do-org-confirm-babel-evaluations (lang body)
+  (not
+  (or
+     (string= lang "python")
+     (string= lang "calc"))))
+(setq org-confirm-babel-evaluate 'do-org-confirm-babel-evaluations)
+#+end_src
+
+The other function in the block above
+will instruct babel to skip the confirmation
+when running =python= or =calc= in org-babel source blocks.
+
+More radical : (setq org-confirm-babel-evaluate nil)
+see (customize-variable 'org-confirm-babel-evaluate)
+
+* The interpreter
+
+Python is distributed with every Linux system.
+Many =bash= and =perl= programs, parts of the operating system,
+have been rewritten with it.
+
+: (setq python-shell-interpreter "python3")
+
+Now you can check your python system interpreter
+#+name:python.sys.version
+#+begin_src python :results output
+  import sys
+  return sys.version
+#+end_src
+
+
+If the answer is 2.7, you'll have to make one more
+customization tweak. The official Python distribution is now
+Python 3.  The 2.7 interpreter is still around for
+historical reasons, but will be dropped from now on.
+
+: (customize-variable 'org-babel-python-command)
+
+to =python3=, and now we are set.
+
+
+While for proper shell to start interactively
+outside of org-babel, the variable will be
+
+: (customize-variable 'python-shell-interpreter)
+
+type =M-x : run-python=
+and the shell (the CPython shell) starts.
+
+If somehow, somewhere the interpreter already started —
+typically when a =session= code block gets evaluated, then the
+shell is already open in a buffer named =*Python*=.
+
+Notice it tells you =python.el= completion is loaded.  You
+should have basic syntax coloring and completion by pressing
+=tab=.  =M-n= and =M-p= loops through the history of commands.
+
+Another python interpreter you should be aware of
+is =ipython= which provides some extra features :
+a =zsh= prompt on the very same command line and
+/automodule reloading/, but we'll save that for later.
+
+Python is often said to be an interpreted programming
+language, but a language is not "interpreted" or "compiled"
+as such. A specific implementation can be an interpreter or
+a compiler.  Over simplification, but still: when a program
+is run, every line of code feeds, in sequence, the
+interpreter/compiler which translates the program into
+byte-code.  The last step generates files, landing in the
+=__pycache__= a folder which in turn contains =.pyc= files extensions 
+named after your program. You can completely ignore that folder,
+the interpreter will manage it.
+
+
+** Basic types and definitions
+Instructions comes in two forms :
+definitions, that don't return anything
+and statements, that do return something.
+
+*** definitions
+=x=1=
+defines a variable =x= holding the value =1=
+As you can see in the interpreter
+this definition does not return any value,
+while the statement
+=x=
+does return the value of the variable
+#+begin_example
+>>> x=1
+>>> x
+1
+>>>
+#+end_example
+
+In the same way
+a function definition *when declared*
+doesn't return anything : do not confuse with
+the return statement of the function,
+but with the return value of an
+expression given to the interpreter.
+
+>>> def f(): return 256
+
+Asking for the value of =f=
+will return a string representation
+of that function as its *type*, *name* and *memory address*.
+
+>>> f
+<function f at 0x7fbdaace2e18>
+
+And of course actually calling that function
+is expressed with =f()=.
+
+Python variables are dynamically typed.  Any variable can
+hold any type from any variable, and — along with its value — the
+type it holds changes during the execution of the program.
+We talk about /binding/ variables.
+
+Asking for an undefined variable /raise/ an error :
+=NameError: name 'y' is not defined=
+We can initialize =y= with "text"
+and ask for it's length :
+
+>>> y="text"
+>>> len(y)
+
+then give the same variable another value
+of a different type and ask again for it's length.
+For instance :
+
+>>> y=2
+>>> len(2)
+
+This time we would get a type error, with the explanation :
+=TypeError: object of type 'int' has no len()=
+
+The type of a variable is implicit and stricly related
+to the value it holds.
+
+The type of a variable can be returned by the =type= function.
+
+>>> x=2.1
+>>> type(x)
+<class 'float'>
+
+which is the same as asking the type of the corresponding
+value (since a variable returns its value).
+>>> type(2.1)
+<class 'float'>
+
+And what is the type of that? Well it's a type again,
+denoted through a =class= which is a reserved keyword,
+and which indicates the nature of the type construct:
+this is object oriented design.
+
+>>> type(type(x))
+<class 'type'>
+
+
+Any variable, function, declared in the interpreter can be
+queried, modifed, or manipulated, even built-in functions, so
+good care is advised to not inadvertently change the
+semantics of the program in its course (say, with an
+embarassing =type=x= for instance).
+Due to the local scoping however, if a parameter takes
+the name of an existing function
+(a commonplace beeing =file=), then it exists only
+for the scope it was defined.
+
+#+begin_src python
+def proceeed() :
+  def open(file) :
+     print("opening %s" % file)
+#+end_src
+
+Yes, it's possible to define functions inside of functions
+(so you can call functions while calling functions...).
+Here =open= and =file= already exists as built-ins,
+but the definition of =file= designate the parameter
+only inside the =open= function, while this definition
+of =open= only exist in =proceed=. Out of that scope,
+both =open= and =file= keep refering to their original definition.
+
+** Getting help
+
+The function =help()= will spit out the help text
+of a function or a module.
+#+begin_src python :results output
+  help(type)
+#+end_src
+
+Wich is defined à la lisp, with a string as a first
+statement in a function definition.
+
+Here I'm skipping forward a bit assuming you
+know about function definitions, scopes and
+indentations.
+Otherwise, here it is, in the official tutorial.
+https://docs.python.org/3.6/tutorial/controlflow.html#defining-functions
+
+#+begin_src python :results output
+  def greetings(name):
+     """ And here we can describe what the function does
+     """
+     print ("Hello %s" % name)
+
+  greetings('Vincent')
+  help(greetings)
+#+end_src
+
+* Session
+
+Every code block is an independent program
+ #+begin_src python :results none :var x=3
+ x=0
+ #+end_src
+ #+begin_src python :results none
+ x+=1
+ #+end_src
+
+unless we enter session mode.
+
+ Session mode in python is slightly different from
+ non-session mode, because in session mode you are talking
+ to a single "interactive" python session. In python's
+ interactive mode, blank lines are special: _they indicate
+ the end of an indented block_. So you have to write your
+ org-mode python code a little different when using session
+ mode. Besides, the return type is implicit, it is the last
+ expression, as in an interactive shell.
+
+  [2020-12-19 sam. 17:35] Things could be different now in org 9.3
+
+ #+begin_src python :session :results none :var x=3
+ x
+ #+end_src
+
+#+name:x
+#+begin_src python :session :results var
+x+=1
+x
+ #+end_src
+
+The above program can be run repeatdly (with =C-c=)
+and the result will keep increasing.
+
+* Memo noweb
+
+#+NAME:callthat
+#+begin_src python :var n=77
+return n*2
+#+end_src
+
+#+begin_src python :results raw :noweb yes :var n=79
+<<callthat>>
+return n
+#+end_src
+
+Every block is considered as a function
+with its own scope and variable namespace
+
+#+begin_src python :results raw :noweb yes :var x=78
+<<callthat>>
+return n
+#+end_src
+
+#+name: F
+#+begin_src python :results append
+x = 12
+return x
+#+end_src
+
+#+begin_src python :var y=F
+return int(y)+1
+#+end_src
+
+* variable org-babel
+#+name:N
+#+begin_src python :session :var n=7
+n
+#+end_src
+
+#+name:golden ratio
+#+begin_src python :session :results output :var i=N
+  from math import sqrt
+  print(n)
+  n+=i
+  print(n+sqrt(5))/2
+#+end_src
+
+#+RESULTS: golden ratio
+: 7
+: 16.23606797749979
+
+
+When babel doesn't provide
+the expected output, the error might be silenced,
+— which isn't much in the spirit of python —
+or displayed in the =*Org-Babel Error Output*= buffer.
+In the first block, changing the variable to n="3"
+will raise an error in the second block,
+wich in turn won't provide any result.
+The error appears in the =*Python*= buffer,
+but it's not the best place to investigate.
+Changing the =:results= from =value= to =output=
+will make the situation explicit.
+
+For debugging at least : if the intent is
+to use that result to feed another function,
+then =output= won't provide the computed golden
+ratio, but the =print= statement output, which
+is 3 in this example.
+
+Babel provides an extra layer to organize
+the code, so in the end it's only a matter
+of opening the proper channels to direct
+the results in the proper buffers.
+
+* Formatting output, tables of squares and cubes
+
+#+Begin_src python :results output
+
+  print(' {4:2s}    {0:5s} {1:7s}{2:4s}  {3:10s}'.format('x','x^2','ko','x^3','n'))
+
+  for n in range(0, 11):
+       x=2<<n
+       ko=int(x**2/1024)
+       print('{4:2d} {0:5d} {1:7d} {2:4d}{3:12d}'.format(x,x**2,ko,x**3,n))
+
+  print('-'*33)
+  # right justify as string (through repr or str)
+  for x in range(1, 12):
+       print(repr(x).rjust(2), repr(x*x).rjust(3), end=' | ')
+       # Note use of 'end' on previous line, instead of '\n' by default
+       print(repr(x**3).rjust(4))
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+ n     x     x^2    ko    x^3
+ 0     2       4    0           8
+ 1     4      16    0          64
+ 2     8      64    0         512
+ 3    16     256    0        4096
+ 4    32    1024    1       32768
+ 5    64    4096    4      262144
+ 6   128   16384   16     2097152
+ 7   256   65536   64    16777216
+ 8   512  262144  256   134217728
+ 9  1024 1048576 1024  1073741824
+10  2048 4194304 4096  8589934592
+---------------------------------
+ 1   1 |    1
+ 2   4 |    8
+ 3   9 |   27
+ 4  16 |   64
+ 5  25 |  125
+ 6  36 |  216
+ 7  49 |  343
+ 8  64 |  512
+ 9  81 |  729
+10 100 | 1000
+11 121 | 1331
+#+end_example
+
+** sys.stdout
+
+#+begin_src python :results output
+  import sys
+  sys.stdout.write("1..")
+  sys.stdout.write("2")
+  sys.stdout.flush()
+
+#+end_src
+
+#+RESULTS:
+: 1..2
+None
+None
+
+* Lambdas expressions
+#+begin_src python :session :results var
+def g(n, f=lambda i:0):
+   return [f(i) for i in range(1,n+1)]
+
+g(10, f=lambda x:2**x), g(10, f=lambda x:3**x)
+#+end_src
+
+#+RESULTS:
+| 2 | 4 |  8 | 16 |  32 |  64 |  128 |  256 |   512 |  1024 |
+| 3 | 9 | 27 | 81 | 243 | 729 | 2187 | 6561 | 19683 | 59049 |
+
+* Files
+** initializing a file buffer
+
+#+Name: resetLog
+#+Begin_src python :session test :results output :var file="/tmp/log" mark="1"
+  f = open(file,'w+')
+  f.write(mark)
+  f.close ()
+#+end_src
+
+#+RESULTS: resetlog
+
+Be careful with the *file* keyword though,
+as it's already a bound function.
+
+** Write permissions
+#+Name: writeaccess
+#+Begin_src python :session test :results output :var file="/tmp/log" testfile="/tmp/mark0123"
+
+  f1 = open(file,'r+')
+  n = f1.read()
+  i = int(n)
+  i += 1
+  f1.seek(0)
+  f1.write(str(i))
+  f1.close()
+
+  # woops error silenced
+  f2 = open(testfile,'w')
+  f2.write('')
+  f2.close()
+  f2 = open(testfile, 'rb+')
+  f2.write(b'0123456789abcdef') #noticed the bYTE ?
+  a = f2.seek(5)      # Go to the 6th byte in the file
+  b = f2.read(1)
+  #5
+  f2.seek(-3, 2)  # Go to the 3rd byte before the end
+  c = f2.read(1)
+  #d
+  f2.close()
+  # pour conclure correctement le test, vérifier simplement
+  # les types de retour (je les ai gardé lisible pour mémo, on va s'en resservir)
+  # et les octets attendus
+
+  print('\n'.join([str(i),str(a),str(b),str(c),str(f1),str(f2)]))
+#+end_src
+
+#+begin_src python :results output drawer
+  def fib(n):    # Write Fibonacci series up to n.
+      """ Print a Fibonacci series up to n."""
+      a, b = 0, 1
+      while a < n:
+          print(a, end=' ')
+          a, b = b, a+b
+      print()
+
+  fib(100)
+#+end_src
+
+* global level and modules
+#+begin_src python :results output :session
+  from pprint import pprint
+  pprint(globals())
+#+end_src
+
+* TODO list, set, tuple, dictionary
+* Objects
+
+Every object is backed up by a =__dict__= object which acts as
+a namespace for that object.
+
+** Init, Enter, Exit
+#+Begin_src python :session :results output
+  class aClass :
+      def __init__(self,v):
+          self.v=v
+      def __enter__(self):
+          print(__class__, "__enter__", self)
+          return self.v
+      def __exit__(self, type, value, traceback):
+          print(__class__, '__exit__', value, traceback)
+      def __del__(self):
+          print(__class__, '__del__', self)
+
+  print('>')
+  with aClass(42) as value:
+      print ("\ninside of block 'with'", value)
+#+end_src
+
+#+RESULTS:
+: >
+: <class '__main__.aClass'> __enter__ <__main__.aClass object at 0x7f9a53e11a20>
+:
+: inside of bloc 'with' 42
+: <class '__main__.aClass'> __exit__ None None
+: <class '__main__.aClass'> __del__ <__main__.aClass object at 0x7f9a53e11a20>
+
+
+Note that =self= isn't a keyword.
+The following is still respectable python
+
+#+Begin_src python :session :results output
+  class MyClass :
+      def __init__(λ,v):
+          λ.v=v
+      def __enter__(λ):
+          print(__class__,"__enter__")
+          return λ.v
+      def __exit__(λ,type, value, traceback):
+          print(__class__,'__exit__',value,traceback)
+      def __del__(λ):
+          print(__class__,'__del__')
+
+  print('\r')
+  with MyClass(42) as value:
+      print ("in block 'with' and",value)
+#+end_src
+
+
+
+and here's an oddity :
+#+Begin_src python :results output
+  class aClass :
+      def __init__(self,v):
+          self.v=v
+      def __enter__(self):
+          print(__class__,"__enter__")
+          return self.v
+      def __exit__(self,type,value,traceback):
+          print(__class__,'__exit__',value,traceback)
+      def __del__(self):
+          print(__class__,'__del__',self)
+      def p(self):
+          print("ok",self)
+
+  f = aClass(1).p
+  print(f())
+#+end_src
+
+non-session output :
+#+RESULTS:
+: ok <__main__.aClass object at 0x7f6a9f80c978>
+: None
+: <class '__main__.aClass'> __del__ <__main__.aClass object at 0x7f6a9f80c978>
+
+session output in
+#+RESULTS:
+: <class '__main__.aClass'> __del__ <__main__.aClass object at 0x7f9a53e1b4a8>
+: ok <__main__.aClass object at 0x7f9a53e1b8d0>
+: None
+
+
+
+** Fonction /single dispatch/ générique
+Polymorphisme à la Java à l'aide de _décorateurs_
+#+name: single_dispatch
+#+Begin_src python :results output
+  from functools import singledispatch
+  @singledispatch
+  def F(arg):
+      return "par défaut"
+
+  @F.register(int)
+  @F.register(float)
+  def _(arg):
+      return "pour un nombre"
+
+  class C: pass
+
+  @F.register(C)
+  def _(arg):
+      return "pour un objet C"
+
+  print( ( F("x"), F([]), F(1), F(C()) ) )
+  print(F.registry.keys())
+#+end_src
+
+#+RESULTS: single_dispatch
+: ('par défaut', 'par défaut', 'pour un nombre', 'pour un objet C')
+: dict_keys([<class 'float'>, <class 'int'>, <class 'object'>, <class '__main__.C'>])
+
+* org-tables
+
+[[info:org#Environment of a Code Block]]
+#+NAME: less-cols
+          | a |
+          |---|
+          | b |
+          | c |
+
+ #+begin_src python :var tab=less-cols :colnames yes
+ return [[val + '*' for val in row] for row in tab]
+ #+end_src
+
+ #+RESULTS:
+ | a  |
+ |----|
+ | b* |
+ | c* |
+* GIL
+https://docs.python.org/3.4/glossary.html#term-global-interpreter-lock
+* TODO Serialization with pickle
+
+#+begin_src python :session :results output
+  from pickle import dumps, load
+
+  class A:
+      def __init__(self,v):
+          self.v=v
+
+  F = testfile="/tmp/serialize.dump"
+
+  a = A(15)
+  f = open(F,'wb')
+  f.write(dumps(a))
+  f.close()
+
+  f = open(F,'rb')
+  o = load(f)
+  f.close()
+
+  print (o.v)
+#+end_src
+
+#+RESULTS:
+: 15
+
+* Magic methods
+see magicmethods.org
+* Non blocking logging with thread safety
+
+#+Begin_src python :result output
+
+class Log :
+   def __init__(_,_file):
+      _.a = open(_file, 'a')
+      _.ready = True
+
+   def read():
+      _.r = open('r', file)
+      pass
+
+   def write(event):
+      queue.put(event)
+
+   def stream(_):
+      # thread_safe. Non blocking
+      # chrono
+      ms=0
+      while not queue.empty() and _.ready:
+          T = queue.get()
+          #atomicité de l'opération write
+          nb+=_.a.write(T)  # et en cas d'interruption ?
+      # nb/ms
+
+   def close(_):
+      _.ready = false;
+      close(_.a)
+      close(_.r)
+
+
+from threading import Thread
+
+L = Log("/tmp/a.log")
+
+def writeGibberish():
+    global L
+    print('.',end="-")
+    for i in range(16):
+        L.write(i)
+        L.stream()
+
+for i in range(128):
+    t=Thread(target=writeGibberish)
+    t.start()
+    print(i)
+
+print('?')
+#+end_src
+
+#+RESULTS:
+: None
+
+[[/tmp/a.log]]
+
+* reading the standard output
+
+#+Begin_src python :session tools :results output
+# http://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python?rq=1
+  import sys
+  from subprocess import PIPE, Popen
+  from threading  import Thread
+
+  try:
+      from Queue import Queue, Empty
+  except ImportError:
+      from queue import Queue, Empty  # python 3.x
+
+  ON_POSIX = 'posix' in sys.builtin_module_names
+
+  def enqueue_output(out, queue):
+      for line in iter(out.readline, b''):
+          queue.put(line)
+      out.close()
+
+  p = Popen(['./veryverbose'], stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
+  q = Queue()
+  t = Thread(target=enqueue_output, args=(p.stdout, q))
+  t.daemon = True # thread dies with the program
+  t.start()
+
+  # ... do other things here
+
+  # read line without blocking
+  try:  line = q.get_nowait() # or q.get(timeout=.1)
+  except Empty:
+      print('no output yet')
+  else: # got line
+      # ... do something with line
+      print('line')
+#+end_src
+
+* strftime reference
+Note: Examples are based on datetime.datetime(2013, 9, 30, 7, 6, 5)
+Code 	Meaning 	Example
+%a 	Weekday as locale’s abbreviated name. 	Mon
+%A 	Weekday as locale’s full name. 	Monday
+%w 	Weekday as a decimal number, where 0 is Sunday and 6 is Saturday. 	1
+%d 	Day of the month as a zero-padded decimal number. 	30
+%-d 	Day of the month as a decimal number. (Platform specific) 	30
+%b 	Month as locale’s abbreviated name. 	Sep
+%B 	Month as locale’s full name. 	September
+%m 	Month as a zero-padded decimal number. 	09
+%-m 	Month as a decimal number. (Platform specific) 	9
+%y 	Year without century as a zero-padded decimal number. 	13
+%Y 	Year with century as a decimal number. 	2013
+%H 	Hour (24-hour clock) as a zero-padded decimal number. 	07
+%-H 	Hour (24-hour clock) as a decimal number. (Platform specific) 	7
+%I 	Hour (12-hour clock) as a zero-padded decimal number. 	07
+%-I 	Hour (12-hour clock) as a decimal number. (Platform specific) 	7
+%p 	Locale’s equivalent of either AM or PM. 	AM
+%M 	Minute as a zero-padded decimal number. 	06
+%-M 	Minute as a decimal number. (Platform specific) 	6
+%S 	Second as a zero-padded decimal number. 	05
+%-S 	Second as a decimal number. (Platform specific) 	5
+%f 	Microsecond as a decimal number, zero-padded on the left. 	000000
+%z 	UTC offset in the form +HHMM or -HHMM (empty string if the the object is naive).
+%Z 	Time zone name (empty string if the object is naive).
+%j 	Day of the year as a zero-padded decimal number. 	273
+%-j 	Day of the year as a decimal number. (Platform specific) 	273
+%U 	Week number of the year (Sunday as the first day of the week) as a zero padded decimal number. All days in a new year preceding the first Sunday are considered to be in week 0. 	39
+%W 	Week number of the year (Monday as the first day of the week) as a decimal number. All days in a new year preceding the first Monday are considered to be in week 0. 	39
+%c 	Locale’s appropriate date and time representation. 	Mon Sep 30 07:06:05 2013
+%x 	Locale’s appropriate date representation. 	09/30/13
+%X 	Locale’s appropriate time representation. 	07:06:05
+%% 	A literal '%' character. 	%
+
+
+#+begin_src python :results output
+from time import time
+t = time()
+print(t)
+
+#+end_src
+
+#+RESULTS:
+: 1583875689.1584399
+
+
+**
+   #+begin_src python
+import time
+
+def countdown(t):
+    while t:
+        mins, secs = divmod(t, 60)
+        timeformat = '{:02d}:{:02d}'.format(mins, secs)
+        print(timeformat, end='\r')
+        time.sleep(1)
+        t -= 1
+    print('Goodbye!\n\n\n\n\n')
+   #+end_src
+* timeit
+  #+begin_src python :results output
+from timeit import timeit
+
+def rev(n,L):
+    for x in reversed(L):
+        n += x
+    return(n)
+
+def rev1(n,L):
+    for x in L[::-1]:
+        n += x
+    return(n)
+
+def rev2(n,L):
+    for i in range(len(L)-1, 0, -1):
+        n += L[i]
+    return(n)
+
+
+def loop(f,x):
+    n=0
+    x = f(n,L)
+
+a=b=c=0
+L = [x for x in range(300000)]
+
+def tit(x):
+    return timeit(x,number=100)
+
+print(tit(lambda:loop(rev,a)))
+print(tit(lambda:loop(rev1,b)))
+print(tit(lambda:loop(rev2,c)))
+
+  #+end_src
+
+
+
+
+on iPython :
+
+#+begin_src python
+
+%alias_magic t timeit
+
+L = [x for x in range(3000000)]
+
+def rev(n,L):
+    for x in reversed(L):
+	n += x
+    return(n)
+
+def rev1(n,L):
+    for x in L[::-1]:
+	n += x
+    return(n)
+
+def rev2(n,L):
+    for i in range(len(L)-1, 0, -1):
+	n += L[i]
+    return(n)
+
+def loop(f,x):
+    n=0
+    x = f(n,L)
+
+a=b=c=0
+%t loop(rev,a)
+%t loop(rev1,b)
+%t loop(rev2,c)
+#+end_src
+
+* Memory analysis with tracemalloc
+
+Every objects has a __sizeof__() function.
+
+
+10 biggest objects
+#+Name:Snapshot1
+#+begin_src python :session :results value
+  import tracemalloc
+  tracemalloc.start()
+
+  #run the application...
+
+  snapshot = tracemalloc.take_snapshot()
+  top_stats = snapshot.statistics('lineno')
+  [[str(t)] for t in top_stats[:10]]
+
+#+end_src
+
+Memory leak search :
+#+Name:Snapshot2
+#+begin_src python :session :results value
+  import tracemalloc
+  tracemalloc.start()
+
+  #run the application...
+  snapshot2 = tracemalloc.take_snapshot()
+  top_stats = snapshot.compare_to(snapshot,'lineno')
+  print("[ Top 10 différences ] ")
+  [[str(stat)] for stat in top_stats[:10]]
+
+#+end_src
+
+* ipython autoreload
+#+begin_src python
+'''
+enable autoreload of a library whenever a change occurs
+'''
+%load_ext autoreload
+%autoreload 2
+%aimport pyorgmode
+# set the locale for correct date handling (%a)
+import locale
+locale.setlocale(locale.LC_TIME, "")
+
+# you'll need it to properly handle
+# date format such as <2017-03-24 Fri> or <2017-03-24 ven.>
+
+from pyorgmode import *
+org = OrgDataStructure()
+org.load_from_file("tests/orgs/test.org")
+topnodes = org.toplevel_nodes()
+headings = [T.heading for T in topnodes]
+print(headings)
+for it in topnodes :
+    print (it.level, it.todo, it.priority, it.heading, it.tags)
+#+end_src
+
+* Installation of further Python versions
+
+In further versions of Python are introduced
+new language features.
+For instance as of 3.6
+was introduced the matrix multiplicatioin operator (@).
+
+At the end of 2020,
+Python latest version is 3.9.1
+Every release brings a significant amount or improvements.
+
+https://www.python.org/doc/versions/
+
+The following compilation options enable
+- the creation and loading C shared library
+- history in the shell
+- PGO
+- link time optimization
+https://stackoverflow.com/questions/41405728/what-does-enable-optimizations-do-while-compiling-python
+
+./configure --enable-shared --enable-loadable-sqlite-extensions --enable-optimizations --with-lto
+https://www.python.org/
+https://www.python.org/downloads/release/python-391/
+https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz
+https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
+
+* Flycheck
+#+begin_src elisp
+;;; (add-hook 'python-mode-common-hook 'flycheck-mode)
+;(require 'flymake-python-pyflakes)
+;(add-hook 'python-mode-hook 'flymake-python-pyflakes-load)
+; (global-flycheck-mode 1)  ;; << will globally bind C-c !
+(with-eval-after-load 'flycheck
+  (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+end_src
+* Graphics'n Gui
+** [66%] Tk interlude
+#+CALL: TestCase()
+#+CALL: DefaultBindings()
+#+CALL: tktest()
+#+RESULTS:
+
+**** TODO gestion des Evènements
+     #frame.focus_set() #rly?
+     #Log.put(event)
+     #print "clicked at", event.x, event.y
+     #Log.put((evt.widget,evt.x,evt.y,
+     #evt.x_root,evt.y_root,evt.char,evt.keysym,evt.keycode, 7evt.num)
+
+**** DONE bindings par défaut
+#+NAME: DefaultBindings
+#+Begin_src python :session :tangle yes
+
+  def key(event):
+      print ("pressed", repr(event.keysym))
+
+  def Esc(event):
+      quit()
+
+  def mouseCallback(evt):
+      Log.put({'type':evt.type,'widget':evt.widget,'x':evt.x,'y':evt.y, 'btn':evt.num})
+      # x and y root left aside
+
+  def callback(evt):
+      print (evt.type)
+
+  def ignore(event):
+      # avoid this for toplevel as is will mute the event
+      return "break"
+
+  def windows_callback(evt):
+  # a <configure> event
+  #
+  # evt 22 = configure (windows_event). peu utile comme évènement, niveau trace/debug
+      Log.put(evt.type,{'width':evt.width,'height':evt.height,'x_root':evt.x_root,'y_root':evt.y_root})
+  # no ? filter event logging base on their type : better, pipe it to the tkinter filter
+  # rem : not very pythonic
+  # let's see later about dnd'
+
+
+  def defaultbindings(frame):
+      frame.bind("<Key>",key)
+  #   The user pressed any key. The key is provided in the char member of the event object passed to the callback (this is an empty string for special keys).
+
+  #    a
+  #   The user typed an “a”. Most printable characters can be used as
+  #   is. The exceptions are space (<space>) and less than
+  #   (<less>). Note that 1 is a keyboard binding, while <1> is a
+  #   button binding.
+      frame.bind("<Escape>",Esc)
+      frame.bind("<Button-1>", callback)
+      frame.bind("<Button-2>", callback)
+      # think about the Menu button
+      frame.bind("<Button-2>", callback)
+      frame.bind("<Double-Button-1>", callback)
+      # Note that if you bind to both a single click (<Button-1>)
+      # and a double click, both bindings will be called.
+
+      frame.bind("<Enter>", callback)
+      # The mouse pointer entered the widget (this event doesn’t mean that
+      # the user pressed the Enter key!).
+
+      frame.bind("<Leave>", callback)
+      # The mouse pointer left the widget.
+
+      frame.bind("<FocusIn>", callback)
+      # Keyboard focus was moved to this widget, or to a child of this widget.
+      frame.bind("<FocusOut>", callback)
+      # Keyboard focus was moved from this widget to another widget.
+
+      frame.bind("<Return>", callback)
+
+      # The user pressed the Enter key. You can bind to virtually all keys on the keyboard. For an ordinary 102-key PC-style keyboard, the special keys are Cancel (the Break key), BackSpace, Tab, Return(the Enter key), Shift_L (any Shift key), Control_L (any Control key), Alt_L (any Alt key), Pause, Caps_Lock, Escape, Prior (Page Up), Next (Page Down), End, Home, Left, Up, Right, Down, Print, Insert, Delete, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, Num_Lock, and Scroll_Lock.
+
+      frame.bind("<Shift-Up>", callback)
+
+      # The user pressed the Up arrow, while holding the Shift key
+      # pressed. You can use prefixes like Alt, Shift, and Control.
+
+      frame.bind("<Configure>", windows_callback)
+
+      # The widget changed size (or location, on some platforms). The
+      # new size is provided in the width and height attributes of the
+      # event object passed to the callback.
+
+  "defaults bindings set"
+
+#+end_src
+#+RESULTS: DefaultBindings
+: defaults bindings set
+=defaults bindings set
+
+**** DONE TkTest
+#+NAME: Tktest
+#+Begin_src python :session :results output
+
+  #from Tkinter import *
+  from tkinter import *
+  from tkinter import messagebox
+  import sys
+
+  def quit():
+      print("exiting now")
+      if messageBox.askokcancel("Quit", "Do you really wish to quit?"):
+          # make sure widget instances are deleted
+          root.destroy()
+      # event is automatically sent to the log
+      #top.protocol("WM_DELETE_WINDOW", top.destroy)
+
+  def XColorString(color) :
+      return '#%02x%02x%02x' % color
+
+  if __name__ == '__main__':
+      root=Tk()
+      root.geometry("%dx%d+%d+%d" % (360,200,900,600))
+      root.protocol("WM_DELETE_WINDOW", quit)
+      root.bind('<Escape>', Esc)
+      #Log=LogBuffer('./log.org')
+      #frame = Frame(root)
+      grey=(180, 180, 0)
+      m = PanedWindow(master=root,orient=VERTICAL, background=XColorString(grey))
+      m.background = XColorString(grey)
+      m.pack(fill=BOTH, expand=1)
+      top = Label(m, text="top pane")
+      m.add(top)
+      bottom = Label(m, text="bottom pane")
+      m.add(bottom)
+      defaultbindings(root)
+      #defaultbindings(frame)
+      #frame.pack()
+      #top.protocol("WM_TAKE_FOCUS", top.takefocus)
+      root.mainloop()
+      True
+#+end_src
+
+#+RESULTS: Tktest
+:
+: ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... >>> ... ... ... ... ... ... ... ... ... >>> ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... >>> >>> ... >>> >>> ... ... ... ... ... ... ... ... >>> ... ... >>> ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ''
+: ''
+: Traceback (most recent call last):
+:   File "<stdin>", line 5, in <module>
+: NameError: name 'Esc' is not defined
+
+#+RESULTS:
+**** The tk color picker
+how to gracefully extend that program so the choosen color
+turns into a readable variable for an interactive program ?
+It sounds simple at first, but here you would discover the
+importance of the design choices in the former module (the
+color picker itself)
+*** tk, les boutons et le dnd
+
+"When you press down a mouse button over a widget, Tkinter will
+automatically “grab” the mouse pointer, and subsequent mouse events
+(e.g. Motion and Release events) will then be sent to the current
+widget as long as the mouse button is held down, even if the mouse is
+moved outside the current widget."
+
+*** TODO Configuration des touches
+*** TODO sauvegarde du configurateur d'objet
+*** TODO FrameBSP
+#+Begin_src python
+  #Binary Tree Levelorder Traversal
+  def traverse_levelorder (tree_node):
+    queue.put(tree_node)
+    while not queue.empty():
+      T = queue.get()
+      if t is not None:
+        visit(t)
+        queue.put(t.left)
+        queue.put(t.right)
+        queue.put(t)
+  queue.put(t)
+#+End_src
+
+** SDL2+OpenGl with a non blocking input
+# le nom du module
+DEFAULT_MODULE = 'sdl2ogl'
+thismodule = DEFAULT_MODULE
+# chargement
+IGL = __import__(thismodule)
+t = Thread(target=IGL.start)
+t.start()
+# l'interpreteur se poursuit
+# et on peut lui indiquer les nouvelles valeurs
+# lue par la simulation
+
+*** sdl+ogl
+#+begin_src python
+"""OpenGL rendering"""
+import sys
+import ctypes
+
+from OpenGL import GL, GLU
+import sdl2
+
+clearcolor=(0,0,0)
+def justdoit(): # call Ion.justdoit() from pyshell
+    global clearcolor
+    clearcolor=(0,1,0)
+
+def run():
+    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO) != 0:
+        print(sdl2.SDL_GetError())
+        return -1
+
+    window = sdl2.SDL_CreateWindow(b"OpenGL demo",
+                                   sdl2.SDL_WINDOWPOS_UNDEFINED,
+                                   sdl2.SDL_WINDOWPOS_UNDEFINED, 800, 600,
+                                   sdl2.SDL_WINDOW_OPENGL)
+    if not window:
+        print(sdl2.SDL_GetError())
+        return -1
+
+    context = sdl2.SDL_GL_CreateContext(window)
+
+    GL.glMatrixMode(GL.GL_PROJECTION | GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+    GL.glOrtho(-400, 400, 300, -300, 0, 1)
+
+    x = 0.0
+    y = 30.0
+
+    event = sdl2.SDL_Event()
+    running = True
+    while running:
+        while sdl2.SDL_PollEvent(ctypes.byref(event)) != 0:
+            if event.type == sdl2.SDL_KEYDOWN :
+                if event.key.keysym.sym == sdl2.SDLK_F2:
+                    print ('>now what ?\n')
+                    running = False
+                if event.key.keysym.sym == sdl2.SDLK_ESCAPE:
+                    running = False
+            if event.type == sdl2.SDL_QUIT:
+                running = False
+
+        GL.glClearColor(clearcolor[0], clearcolor[1], clearcolor[2], 1)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        GL.glRotatef(10.0, 0.0, 0.0, 1.0)
+        GL.glBegin(GL.GL_TRIANGLES)
+        GL.glColor3f(1.0, 0.0, 0.0)
+        GL.glVertex2f(x, y + 90.0)
+        GL.glColor3f(0.0, 1.0, 0.0)
+        GL.glVertex2f(x + 90.0, y - 90.0)
+        GL.glColor3f(0.0, 0.0, 1.0)
+        GL.glVertex2f(x - 90.0, y - 90.0)
+        GL.glEnd()
+
+        sdl2.SDL_GL_SwapWindow(window)
+        sdl2.SDL_Delay(10)
+    sdl2.SDL_GL_DeleteContext(context)
+    sdl2.SDL_DestroyWindow(window)
+    sdl2.SDL_Quit()
+    return 0
+
+# don't
+# if __name__ == "__main__":
+#      sys.exit(run())
+def start():
+    print ('now what ?\n')
+    sys.exit(run())
+# yes, it's already out unless a root tk is still flying around
+#+end_src
+
+#+RESULTS:
+** Idle and PyShell invocation
+
+http://stackoverflow.com/questions/39543888/python-pygame-can-you-run-a-program-whilst-having-a-pygame-window-that-can-stil/39573442?noredirect=1#comment66863541_39573442
+
+Some details of what you must do may depend on what you want to do
+with IDLE's Shell once you have it running. I would like to know more
+about that. But let us start simple and make the minimum changes to
+pyshell.main needed to make it run with other code.
+
+Note that in 3.6, which I use below, PyShell.py is renamed
+pyshell.py. Also note that everything here amounts to using IDLE's
+private internals and is 'use at your own risk'.
+
+I presume you want to run Shell in the same process (and thread) as
+your tkinter code. Change the signature to
+
+def main(tkroot=None):
+
+Change root creation (find # setup root) to
+You should be able to call pyshell.main whenever you want.
+#+Begin_src python
+
+tkroot=None
+if not tkroot:
+    root = Tk(className="Idle")
+    root.withdraw()
+else:
+    root = tkroot
+
+# In current 3.6, there are a couple more lines to be indented under if not tkroot:
+
+    if use_subprocess and not testing:
+        NoDefaultRoot()
+
+# Guard mainloop and destroy (at the end) with
+
+if not tkroot:
+    while flist.inversedict:  # keep IDLE running while files are open.
+        root.mainloop()
+    root.destroy()
+# else leave mainloop and destroy to caller of main
+"""
+The above adds 'dependency injection' of a root window to the
+function. I might add it in 3.6 to make testing (an example of 'other
+code') easier.
+"""
+#The follow tkinter program now runs, displaying the both the root window and an IDLE shell.
+
+from tkinter import Tk
+from idlelib import pyshell
+
+root = Tk()
+Label(root, text='Root id is '+str(id(root))).pack()
+root.update()
+def later():
+    pyshell.main(tkroot=root)
+    Label(root, text='Use_subprocess = '+str(pyshell.use_subprocess)).pack()
+
+root.after(0, later)
+root.mainloop()
+#+End_src
+
+#+RESULTS:
+
+* if/else vs list comprehension
+
+
+import sys
+
+
+def get_datasets(observatoryGroup=None, instrumentType=None, observatory=None,
+                 instrument=None,
+                 startDate=None, stopDate=None, idPattern=None, labelPattern=None, notesPattern=None):
+
+        return [ f'{x}={y}' for (x,y) in [
+            ("observatory",observatory),
+            ("observatoryGroup",observatoryGroup),
+            ("instrumentType",instrumentType),
+            ("instrument",instrument),
+            ("startDate",startDate),
+            ("stopDate", stopDate ),
+            ("idPattern", idPattern ),
+            ("labelPattern", labelPattern ),
+            ("notesPattern", notesPattern )
+        ] if y is not None]
+
+
+# get_datasets(observatoryGroup=False)
+
+def distest() :
+    import dis
+
+    dis.dis("""args = [ f'{x}={y}' for (x,y) in [
+                ('observatory',observatory),
+                ('observatoryGroup',observatoryGroup),
+                ('instrumentType',instrumentType),
+                ('instrument',instrument),
+                ('startDate',startDate),
+                ('stopDate', stopDate ),
+                ('idPattern', idPattern ),
+                ('labelPattern', labelPattern ),
+                ('notesPattern', notesPattern )
+            ] if y is not None]""" )
+
+
+    print("-----------")
+
+    dis.dis("""args = []
+    if observatory is not None:
+        args.append(f'observatory={observatory}')
+    if observatoryGroup is not None:
+        args.append(f'observatoryGroup={observatoryGroup}')
+    if instrumentType is not None:
+        args.append(f'instrumentType={instrumentType}')
+    if instrument is not None:
+        args.append(f'instrument={instrument}')
+    if startDate is not None:
+        args.append(f'startDate={startDate}')
+    if stopDate is not None:
+        args.append(f'stopDate={stopDate}')
+    if idPattern is not None:
+        args.append(f'idPattern={idPattern}')
+    if labelPattern is not None:
+        args.append(f'labelPattern={labelPattern}')
+    if notesPattern is not None:
+        args.append(f'notesPattern={notesPattern}')
+        """
+            )
+
+
+def get_datasets0(observatoryGroup=None, instrumentType=None, observatory=None,
+                 instrument=None,
+                 startDate=None, stopDate=None, idPattern=None, labelPattern=None, notesPattern=None):
+
+    args = []
+    if observatory is not None:
+        args.append(f'observatory={observatory}')
+    if observatoryGroup is not None:
+        args.append(f'observatoryGroup={observatoryGroup}')
+    if instrumentType is not None:
+        args.append(f'instrumentType={instrumentType}')
+    if instrument is not None:
+        args.append(f'instrument={instrument}')
+    if startDate is not None:
+        args.append(f'startDate={startDate}')
+    if stopDate is not None:
+        args.append(f'stopDate={stopDate}')
+    if idPattern is not None:
+        args.append(f'idPattern={idPattern}')
+    if labelPattern is not None:
+        args.append(f'labelPattern={labelPattern}')
+    if notesPattern is not None:
+        args.append(f'notesPattern={notesPattern}')
+
+    return args
+
+
+import timeit
+
+print(timeit.timeit(lambda:get_datasets(observatoryGroup=1, instrumentType=2, observatory=3)))
+print(timeit.timeit(lambda:get_datasets0(observatoryGroup=1, instrumentType=2, observatory=3)))
+
+print(timeit.timeit(lambda:get_datasets(idPattern=1, labelPattern=2, notesPattern=3)))
+print(timeit.timeit(lambda:get_datasets0(idPattern=1, labelPattern=2, notesPattern=3)))
