@@ -860,8 +860,6 @@ print(t)
 #+RESULTS:
 : 1583875689.1584399
 
-
-**
    #+begin_src python
 import time
 
@@ -874,7 +872,9 @@ def countdown(t):
         t -= 1
     print('Goodbye!\n\n\n\n\n')
    #+end_src
+
 * timeit
+Timing code execution
   #+begin_src python :results output
 from timeit import timeit
 
@@ -1024,13 +1024,15 @@ The following compilation options enable
 - link time optimization
 https://stackoverflow.com/questions/41405728/what-does-enable-optimizations-do-while-compiling-python
 
-./configure --enable-shared --enable-loadable-sqlite-extensions --enable-optimizations --with-lto
+: ./configure --enable-shared --enable-loadable-sqlite-extensions --enable-optimizations --with-lto
+
 https://www.python.org/
 https://www.python.org/downloads/release/python-391/
 https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz
 https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
 
 * Flycheck
+
 #+begin_src elisp
 ;;; (add-hook 'python-mode-common-hook 'flycheck-mode)
 ;(require 'flymake-python-pyflakes)
@@ -1040,6 +1042,7 @@ https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
   (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+end_src
+
 * Graphics'n Gui
 ** [66%] Tk interlude
 #+CALL: TestCase()
@@ -1221,6 +1224,7 @@ moved outside the current widget."
 #+End_src
 
 ** SDL2+OpenGl with a non blocking input
+#+begin_src python
 # le nom du module
 DEFAULT_MODULE = 'sdl2ogl'
 thismodule = DEFAULT_MODULE
@@ -1231,6 +1235,7 @@ t.start()
 # l'interpreteur se poursuit
 # et on peut lui indiquer les nouvelles valeurs
 # lue par la simulation
+#+end_src
 
 *** sdl+ogl
 #+begin_src python
@@ -1375,11 +1380,9 @@ root.mainloop()
 #+RESULTS:
 
 * if/else vs list comprehension
-
-
+dissassembling and timing two code variants
+#+begin_src python
 import sys
-
-
 def get_datasets(observatoryGroup=None, instrumentType=None, observatory=None,
                  instrument=None,
                  startDate=None, stopDate=None, idPattern=None, labelPattern=None, notesPattern=None):
@@ -1437,7 +1440,7 @@ def distest() :
     if notesPattern is not None:
         args.append(f'notesPattern={notesPattern}')
         """
-            )
+     )
 
 
 def get_datasets0(observatoryGroup=None, instrumentType=None, observatory=None,
@@ -1474,3 +1477,4 @@ print(timeit.timeit(lambda:get_datasets0(observatoryGroup=1, instrumentType=2, o
 
 print(timeit.timeit(lambda:get_datasets(idPattern=1, labelPattern=2, notesPattern=3)))
 print(timeit.timeit(lambda:get_datasets0(idPattern=1, labelPattern=2, notesPattern=3)))
+#+end_src
