@@ -69,7 +69,7 @@ Depending on your symbol definition,
 you'll have to type "yes" or "no", "y" or "n"
 the two latter comes by changing the following predicate
 
-   (fset 'yes-or-no-p 'y-or-n-p) ;  y/n instead of yes/no
+:   (fset 'yes-or-no-p 'y-or-n-p) ;  y/n instead of yes/no
 
 ** configuring ob-python
 
@@ -607,7 +607,11 @@ The following is still respectable python
 
 
 
-and here's an oddity :
+The output of the execution order isn't however guaranteed
+The output of "ok" and True will follow that order,
+but the call to =__del__= may appear before "ok" :
+the function gets a copy, yet the object is deleted.
+#+name: ClassMethods
 #+Begin_src python :results output
   class aClass :
       def __init__(self,v):
@@ -618,55 +622,63 @@ and here's an oddity :
       def __exit__(self,type,value,traceback):
           print(__class__,'__exit__',value,traceback)
       def __del__(self):
-          print(__class__,'__del__',self)
+          print('__del__')
       def p(self):
           print("ok",self)
+          return True
 
   f = aClass(1).p
   print(f())
 #+end_src
 
-non-session output :
-#+RESULTS:
-: ok <__main__.aClass object at 0x7f6a9f80c978>
-: None
-: <class '__main__.aClass'> __del__ <__main__.aClass object at 0x7f6a9f80c978>
+#+RESULTS: ClassMethods
+: ok <__main__.aClass object at 0x7f3d68298fa0>
+: True
+: __del__
 
 session output in
+#+call: ClassMethods[:session]()
 #+RESULTS:
-: <class '__main__.aClass'> __del__ <__main__.aClass object at 0x7f9a53e1b4a8>
-: ok <__main__.aClass object at 0x7f9a53e1b8d0>
-: None
+: __del__
+: ok <__main__.aClass object at 0x7f75451a4910>
+: True
+
+non-session output :
+#+call: ClassMethods()
+#+RESULTS:
+: ok <__main__.aClass object at 0x7f0059834fa0>
+: True
+: __del__
 
 
 
-** Fonction /single dispatch/ générique
-Polymorphisme à la Java à l'aide de _décorateurs_
+** Generic Function /single dispatch/
+Java-like Polymorphism with decorators
 #+name: single_dispatch
 #+Begin_src python :results output
   from functools import singledispatch
   @singledispatch
   def F(arg):
-      return "par défaut"
+      return "default"
 
   @F.register(int)
   @F.register(float)
   def _(arg):
-      return "pour un nombre"
+      return "for a number"
 
   class C: pass
 
   @F.register(C)
   def _(arg):
-      return "pour un objet C"
+      return "for a an objet C"
 
   print( ( F("x"), F([]), F(1), F(C()) ) )
   print(F.registry.keys())
 #+end_src
 
 #+RESULTS: single_dispatch
-: ('par défaut', 'par défaut', 'pour un nombre', 'pour un objet C')
-: dict_keys([<class 'float'>, <class 'int'>, <class 'object'>, <class '__main__.C'>])
+: ('default', 'default', 'for a number', 'for a an objet C')
+: dict_keys([<class 'object'>, <class 'float'>, <class 'int'>, <class '__main__.C'>])
 
 * org-tables
 
@@ -714,7 +726,7 @@ https://docs.python.org/3.4/glossary.html#term-global-interpreter-lock
 #+RESULTS:
 : 15
 
-* Magic methods
+* TODO Magic methods
 see magicmethods.org
 * Non blocking logging with thread safety
 
@@ -1223,18 +1235,18 @@ moved outside the current widget."
   queue.put(t)
 #+End_src
 
-** SDL2+OpenGl with a non blocking input
+** SDL2+OpenGL with a non blocking input
 #+begin_src python
-# le nom du module
+# moduile name
 DEFAULT_MODULE = 'sdl2ogl'
 thismodule = DEFAULT_MODULE
-# chargement
+# loading it
 IGL = __import__(thismodule)
 t = Thread(target=IGL.start)
 t.start()
-# l'interpreteur se poursuit
-# et on peut lui indiquer les nouvelles valeurs
-# lue par la simulation
+# interpreter goes
+# and we can give it new values
+# read by the simulation
 #+end_src
 
 *** sdl+ogl
@@ -1247,7 +1259,7 @@ from OpenGL import GL, GLU
 import sdl2
 
 clearcolor=(0,0,0)
-def justdoit(): # call Ion.justdoit() from pyshell
+def justdoit(): # call <module>.justdoit() from pyshell
     global clearcolor
     clearcolor=(0,1,0)
 
@@ -1309,9 +1321,9 @@ def run():
 # if __name__ == "__main__":
 #      sys.exit(run())
 def start():
-    print ('now what ?\n')
+    print ('starting\n')
     sys.exit(run())
-# yes, it's already out unless a root tk is still flying around
+# here it's already out unless a root tk is still flying around
 #+end_src
 
 #+RESULTS:
