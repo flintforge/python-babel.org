@@ -1,37 +1,31 @@
-#+TITLE: A Python interactive course on Org-babel
+#+TITLE: A Python interactive guide on Org-babel
 #+Date: [2020-12-18 ven.]
 #+Author: Philippe Estival
 #+email: [[mailto:phil.estival@free.fr]]
 
 * Intro
-To start on the right foot, one can read the begining
-of python.el (Python's flying circus support for Emacs),
-which provides =python-mode=, and relies on =comint=.
 
-Beginners can read the tutorial and the guide
-https://docs.python.org/3/using
-https://docs.python.org/3.6/tutorial
+This is a guide for a quick introducing python on org-babel with a
+collection of code snippets.
 
-They can also dig into the present one.
-This is a guide for a quick introduction
-with a collection of code snippets.
+To start on the right foot, advanced coders can take a look at
+python.el (Python's flying circus support for Emacs), which provides
+=python-mode=, and relies on =comint=.  Beginners can also read the
+official tutorial and the guide.  https://docs.python.org/3/using
+https://docs.python.org/3.8/tutorial
 
-It features some of interactions =org-babel= provides
-over code source blocks.
-It was written with Emacs 26.3 and Org-mode 9.3.6
-running on Debian 9 (stretch).
+This guide features some of interactions =org-babel= provides over code
+source blocks.  It was initially written with Emacs 26.3 and Org-mode
+9.3.6 running on Debian 9 (stretch).
 
 Present configuration is :
-
 #+call: org-version()
 #+RESULTS:
 : 9.5
-
 #+call:emacs-version()
 #+results:
 : GNU Emacs 28.0.50 (build 1, x86_64-pc-linux-gnu, X toolkit, cairo version 1.14.8, Xaw scroll bars)
 :  of 2021-08-04
-
 #+call:linux-version()
 #+RESULTS:
 : Linux 7d 4.9.0-16-amd64 #1 SMP Debian 4.9.272-2 (2021-07-19) x86_64 GNU/Linux
@@ -41,10 +35,6 @@ Typing =C-c= on the lines above will call and execute the code
 blocks declared below.  It also works when the cursor
 is /on/ the code blocks.
 
-   side-note : the proper way to write a call is with two
-   parentheses and eventually a named argument, for
-   instance, #+CALL: factorial(n=5), but see, I found a bug,
-   (or is it really one ?) and decided to go with it.
 
 #+Name: org-version
 #+begin_src elisp
@@ -1212,17 +1202,17 @@ importance of the design choices in the former module (the
 color picker itself)
 *** tk, les boutons et le dnd
 
-"When you press down a mouse button over a widget, Tkinter will
+When you press down a mouse button over a widget, Tkinter will
 automatically “grab” the mouse pointer, and subsequent mouse events
 (e.g. Motion and Release events) will then be sent to the current
 widget as long as the mouse button is held down, even if the mouse is
-moved outside the current widget."
+moved outside the current widget.
 
-*** TODO Configuration des touches
-*** TODO sauvegarde du configurateur d'objet
+*** TODO Keyboard configuraiton
+*** TODO Saving object configurator
 *** TODO FrameBSP
 #+Begin_src python
-  #Binary Tree Levelorder Traversal
+  # Binary Tree Levelorder Traversal (visitor pattern)
   def traverse_levelorder (tree_node):
     queue.put(tree_node)
     while not queue.empty():
@@ -1391,7 +1381,7 @@ root.mainloop()
 
 #+RESULTS:
 
-* if/else vs list comprehension
+* if/else vs. list comprehension
 dissassembling and timing two code variants
 #+begin_src python
 import sys
