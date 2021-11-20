@@ -1016,12 +1016,12 @@ for it in topnodes :
     print (it.level, it.todo, it.priority, it.heading, it.tags)
 #+end_src
 
-* Installation of further Python versions
+* Compiling Python
 
 In further versions of Python are introduced
 new language features.
 For instance as of 3.6
-was introduced the matrix multiplicatioin operator (@).
+was introduced the matrix multiplication operator (@).
 
 At the end of 2020,
 Python latest version is 3.9.1
@@ -1177,7 +1177,7 @@ https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
       root.geometry("%dx%d+%d+%d" % (360,200,900,600))
       root.protocol("WM_DELETE_WINDOW", quit)
       root.bind('<Escape>', Esc)
-      #Log=LogBuffer('./log.org')
+      #Log=LogBuffer('./test.log')
       #frame = Frame(root)
       grey=(180, 180, 0)
       m = PanedWindow(master=root,orient=VERTICAL, background=XColorString(grey))
