@@ -360,23 +360,27 @@ return x
 return int(y)+1
 #+end_src
 
-* variable org-babel
-#+name:N
-#+begin_src python :session :var n=7
-n
+* Passing variables between blocks
+
+#+name: X
+#+begin_src python :session :var n=3
+  n
 #+end_src
 
-#+name:golden ratio
-#+begin_src python :session :results output :var i=N
+#+RESULTS: X
+: 3
+
+#+name: golden ratio
+#+begin_src python :session :results value :var i=3
   from math import sqrt
   print(n)
   n+=i
-  print(n+sqrt(5))/2
+  (n+sqrt(5))/2
 #+end_src
 
 #+RESULTS: golden ratio
-: 7
-: 16.23606797749979
+: 4.118033988749895
+
 
 
 When babel doesn't provide
@@ -395,7 +399,7 @@ For debugging at least : if the intent is
 to use that result to feed another function,
 then =output= won't provide the computed golden
 ratio, but the =print= statement output, which
-is 3 in this example.
+is the integer 3 in this example.
 
 Babel provides an extra layer to organize
 the code, so in the end it's only a matter
@@ -1480,3 +1484,17 @@ print(timeit.timeit(lambda:get_datasets0(observatoryGroup=1, instrumentType=2, o
 print(timeit.timeit(lambda:get_datasets(idPattern=1, labelPattern=2, notesPattern=3)))
 print(timeit.timeit(lambda:get_datasets0(idPattern=1, labelPattern=2, notesPattern=3)))
 #+end_src
+
+* Maximum Nesting Depth of the Parentheses
+https://yewtu.be/watch?v=zrOIQEN3Wkk
+#+begin_src python 
+import re,operator
+s="(+(2*3)+((8)/4))+1"
+def scan(f, state, it): 
+     for x in it: state = f(state, x) 
+       yield state 
+return max(list(scan(operator.add, 0, [(1 if x=="(" else -1) for x in re.findall("[()]",s)])))
+#+end_src
+
+#+RESULTS:
+: 3
