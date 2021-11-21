@@ -5,8 +5,7 @@
 
 * Intro
 
-This is a guide for a quick introducing python on org-babel with a
-collection of code snippets.
+This is a guide to learn how to use python on org-babel.
 
 To start on the right foot, advanced coders can take a look at
 python.el (Python's flying circus support for Emacs), which provides
