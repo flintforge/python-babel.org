@@ -17,7 +17,11 @@ This guide features some of interactions =org-babel= provides over code
 source blocks.  It was initially written with Emacs 26.3 and Org-mode
 9.3.6 running on Debian 9 (stretch).
 
-Present configuration is :
+Note that the file isn't intended to be read on github (or briefly)
+as their render of org-mode is incomplete (the following results
+for instance).
+
+Presento configuration is :
 #+call: org-version()
 #+RESULTS:
 : 9.5
@@ -27,7 +31,7 @@ Present configuration is :
 :  of 2021-08-04
 #+call:linux-version()
 #+RESULTS:
-: Linux 7d 4.9.0-16-amd64 #1 SMP Debian 4.9.272-2 (2021-07-19) x86_64 GNU/Linux
+: Linux 4.9.0-16-amd64 SMP Debian (2021-07-19) 
 
 
 Typing =C-c= on the lines above will call and execute the code
