@@ -996,8 +996,7 @@ enable autoreload of a library whenever a change occurs
 # set the locale for correct date handling (%a)
 import locale
 locale.setlocale(locale.LC_TIME, "")
-
-# you'll need it to properly handle
+# ^ you'll need it to properly handle
 # date format such as <2017-03-24 Fri> or <2017-03-24 ven.>
 
 from pyorgmode import *
@@ -1056,14 +1055,7 @@ https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
 #+CALL: tktest()
 #+RESULTS:
 
-**** TODO gestion des Evènements
-     #frame.focus_set() #rly?
-     #Log.put(event)
-     #print "clicked at", event.x, event.y
-     #Log.put((evt.widget,evt.x,evt.y,
-     #evt.x_root,evt.y_root,evt.char,evt.keysym,evt.keycode, 7evt.num)
-
-**** DONE bindings par défaut
+**** DONE default bindings 
 #+NAME: DefaultBindings
 #+Begin_src python :session :tangle yes
 
@@ -1199,12 +1191,13 @@ https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
 
 #+RESULTS:
 **** The tk color picker
-how to gracefully extend that program so the choosen color
-turns into a readable variable for an interactive program ?
-It sounds simple at first, but here you would discover the
-importance of the design choices in the former module (the
-color picker itself)
-*** tk, les boutons et le dnd
+how to gracefully extend that program so the selected color is tried
+and tested before it is applied?  It sounds simple at first, but this
+where we would discover the importance of the design choices in the
+former module: is the color picker blocking ? Does it return a value
+only upon validation? Should the host program be modified to get
+the event ?
+*** tk, buttons & dnd
 
 When you press down a mouse button over a widget, Tkinter will
 automatically “grab” the mouse pointer, and subsequent mouse events
