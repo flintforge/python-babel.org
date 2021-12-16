@@ -113,8 +113,6 @@ Now you can check your python system interpreter
 
 #+RESULTS: python.sys.version
 : 3.9.1 (default, Jan 11 2021, 16:54:16) 
-: [GCC 6.3.0 20170516]
-
 
 
 If the answer is 2.7, you'll have to make one more
@@ -265,10 +263,10 @@ def proceeed() :
 Yes, it's possible to define functions inside of functions
 (so you can call functions while calling functions...).
 Here =open= and =file= already exists as built-ins,
-but the definition of =file= designate the parameter
+but the definition of =file= designates the parameter
 only inside the =open= function, while this definition
-of =open= only exist in =proceed=. Out of that scope,
-both =open= and =file= keep refering to their original definition.
+of =open= only exists in =proceed=. Out of that scope,
+both =open= and =file= keep refering to their original definitions.
 
 ** Getting help
 
@@ -278,7 +276,7 @@ of a function or a module.
   help(type)
 #+end_src
 
-Wich is defined à la lisp, with a string as a first
+Wich is defined /à la lisp/, with a string as first
 statement in a function definition.
 
 Here I'm skipping forward a bit assuming you
@@ -289,8 +287,7 @@ https://docs.python.org/3.6/tutorial/controlflow.html#defining-functions
 
 #+begin_src python :results output
   def greetings(name):
-     """ Here we can describe what the function does
-     """
+     """ Here we can describe what the function does """
      print ("Hello %s" % name)
 
   greetings('Vincent')
@@ -309,7 +306,7 @@ Every code block is an independent program
 
 unless we enter *session* mode.
 
- Session mode in python is slightly different from
+ Session mode in org-python is slightly different from
  non-session mode, because in session mode you are talking
  to a single "interactive" python session. In python's
  interactive mode, blank lines are special: _they indicate
@@ -318,7 +315,7 @@ unless we enter *session* mode.
  mode. Besides, the return type is implicit, it is the last
  expression, as in an interactive shell.
 
-  [2020-12-19 sam. 17:35] I don't know if this holds anymore since org 9.3
+  /[2020-12-19 sam. 17:35] I don't know if this holds anymore since org 9.3/
 
  #+begin_src python :session :results none :var x=3
  x
@@ -472,7 +469,7 @@ the results in the proper buffers.
 None
 None
 
-* Lambdas expressions
+* Lambda expressions
 #+begin_src python :session :results var
 def g(n, f=lambda i:0):
    return [f(i) for i in range(1,n+1)]
