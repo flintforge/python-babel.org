@@ -11,11 +11,11 @@ To start on the right foot, advanced coders can take a look at
 python.el (Python's flying circus support for Emacs), which provides
 =python-mode=, and relies on =comint=.  Beginners can also read the
 official tutorial and the guide.  https://docs.python.org/3/using
-https://docs.python.org/3.8/tutorial
+https://docs.python.org/3/tutorial
 
-This guide features some of interactions =org-babel= provides over code
-source blocks.  It was initially written with Emacs 26.3 and Org-mode
-9.3.6 running on Debian 9 (stretch).
+This guide features some of the interactions =org-babel= provides over
+code source blocks.  It was initially written with Emacs 26.3 and
+Org-mode 9.3.6 running on Debian 9 (stretch).
 
 Note that the file isn't intended to be read on github (or briefly)
 as their render of org-mode is incomplete (the following results
@@ -56,7 +56,7 @@ uname -a
 
 
 Emacs will ask :
-Evaluate this (elisp or python) code block on your system ?
+evaluate this (elisp or python) code block on your system ?
 
 Depending on your symbol definition,
 you'll have to type "yes" or "no", "y" or "n"
