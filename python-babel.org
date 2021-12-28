@@ -55,7 +55,7 @@ uname -a
 #+end_src
 
 
-Emacs will ask :
+Emacs will ask:
 evaluate this (elisp or python) code block on your system ?
 
 Depending on your symbol definition,
@@ -64,7 +64,7 @@ the two latter comes by changing the following predicate
 
 :   (fset 'yes-or-no-p 'y-or-n-p) ;  y/n instead of yes/no
 
-** configuring ob-python
+** Configuring ob-python
 
 We will be running Python source blocks,
 that is, blocks starting with =#+begin_src python=
@@ -406,7 +406,35 @@ the code, so in the end it's only a matter
 of opening the proper channels to direct
 the results in the proper buffers.
 
-* Formatting output, tables of squares and cubes
+* Printing output
+** sys.stdout
+
+#+begin_src python :results output
+  import sys
+  sys.stdout.write("1..")
+  sys.stdout.write("2")
+  sys.stdout.flush()
+
+#+end_src
+
+#+RESULTS:
+: 1..2
+None
+None
+
+
+#+begin_src python
+  import random 
+  dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
+  head = ["Name", "str",  "agi",  "int"]
+  fmt1 ="{0:8s}| {1:3s} | {2:3s} | {3:3s}"
+  fmt2 ="{0:8s}| {1:3d} | {2:3d} | {3:3d}"
+  return [[ fmt1.format(*head)],
+	*([ fmt2.format(*([name]+ random.sample( range(0,20), 3)))]
+	    for name in dogs )]
+#+end_src
+
+** Formatting example : tables of squares and cubes
 
 #+Begin_src python :results output
 
@@ -454,20 +482,98 @@ the results in the proper buffers.
 11 121 | 1331
 #+end_example
 
-** sys.stdout
 
-#+begin_src python :results output
-  import sys
-  sys.stdout.write("1..")
-  sys.stdout.write("2")
-  sys.stdout.flush()
+** Formatting tables
+and adding a prologue header
+
+A basic table output can be return by value
+#+Name: Scores
+#+begin_src python 
+  import random 
+  dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
+  head = ["Name", "str",  "agi",  "int"]
+  fmt1 ="{0:8s}| {1:3s} | {2:3s} | {3:3s}"
+  fmt2 ="{0:8s}| {1:3d} | {2:3d} | {3:3d}"
+  return [[ fmt1.format(*head)],
+	*([ fmt2.format(*([name]+ random.sample( range(0,20), 3)))]
+	    for name in dogs )]
+#+end_src
+
+
+the =:prologue= attributes can be used to insert something before the
+result it requires however the result to be an output, so it requires
+a slight modification
+
+#+Call: Scores2()
+
+#+RESULTS:
+#+ATTR_LaTeX: :center nil :align |p{5cm}|l|l|l|
+|Name    | str | agi | int
+|Max     |   0 |  16 |   6
+|Charlie |   8 |  18 |  14
+|Cooper  |  11 |  18 |   9
+|Buddy   |  18 |   9 |   4
+|Jack    |   4 |  12 |   3
+|Rocky   |  15 |   2 |   8
+|Oliver  |  16 |  13 |   7
+|Bear    |   7 |  11 |  10
+|Duke    |  19 |   5 |   0
+
+
+
+#+Name: Scores2
+#+header: :prologue print('#+ATTR_LaTeX: :center nil :align |p{5cm}|l|l|l|')
+#+begin_SRC python :results output raw :exports results :eval yes
+  import random 
+  dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
+  head = "Name", "str",  "agi",  "int"
+  fmt1 ="|{0:8s}| {1:3s} | {2:3s} | {3:3s}"
+  fmt2 ="|{0:8s}| {1:3d} | {2:3d} | {3:3d}"
+  print(  fmt1.format(*head))
+  for name in dogs :
+      print ( fmt2.format(*([name]+ random.sample( range(0,20), 3))))
 
 #+end_src
 
+
+an other alternative is the =:post= attribute
+
+#+name: attr_wrap
+#+begin_src sh :var data=""  :results output
+  echo "#+ATTR_LATEX: :center nil :align |p{5cm}|l|l|l|"
+  echo "$data"
+#+end_src
+
+Here the origin of the =*this*= should be investigated
+#+Name: Scores3
+#+begin_SRC python :results output raw :post attr_wrap(data=*this*) 
+  import random 
+  dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
+  head = "Name", "str",  "agi",  "int"
+  fmt1 ="|{0:8s}| {1:3s} | {2:3s} | {3:3s}"
+  fmt2 ="|{0:8s}| {1:3d} | {2:3d} | {3:3d}"
+  print(  fmt1.format(*head))
+  for name in dogs :
+      print ( fmt2.format(*([name]+ random.sample( range(0,20), 3))))
+
+#+end_src
+
+
+#+Call: Scores3()
+
 #+RESULTS:
-: 1..2
-None
-None
+#+ATTR_LATEX: :center nil :align |p{5cm}|l|l|l|
+|Name    | str | agi | int
+|Max     |  14 |  15 |   1
+|Charlie |  19 |  17 |   4
+|Cooper  |  18 |  12 |   2
+|Buddy   |  14 |  12 |   8
+|Jack    |   4 |   9 |   6
+|Rocky   |   0 |   8 |  17
+|Oliver  |   2 |   5 |   3
+|Bear    |   5 |  12 |  18
+|Duke    |  12 |  18 |   6
+
 
 * Lambda expressions
 #+begin_src python :session :results var
