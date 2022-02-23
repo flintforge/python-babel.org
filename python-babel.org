@@ -21,7 +21,7 @@ Note that the file isn't intended to be read on github (or briefly)
 as their render of org-mode is incomplete (the following results
 for instance).
 
-Presento configuration is :
+Present configuration is :
 #+call: org-version()
 #+RESULTS:
 : 9.5
@@ -34,9 +34,9 @@ Presento configuration is :
 : Linux 4.9.0-16-amd64 SMP Debian (2021-07-19) 
 
 
-Typing =C-c= on the lines above will call and execute the code
-blocks declared below.  It also works when the cursor
-is /on/ the code blocks.
+Typing =C-c C-c= (which means keeping =Control= pressed while typing =c=
+twice) on the lines above will call and execute the code blocks
+declared below.  It also works when the cursor is /on/ the code blocks.
 
 
 #+Name: org-version
@@ -56,7 +56,7 @@ uname -a
 
 
 Emacs will ask:
-evaluate this (elisp or python) code block on your system ?
+/evaluate this (elisp or python) code block on your system ?/
 
 Depending on your symbol definition,
 you'll have to type "yes" or "no", "y" or "n"
@@ -67,7 +67,7 @@ the two latter comes by changing the following predicate
 ** Configuring ob-python
 
 We will be running Python source blocks,
-that is, blocks starting with =#+begin_src python=
+that is, blocks starting with =#+begin_src python=.
 For this we need to instruct org-babel about what
 languages can be evaluated in the buffer,
 and in what mode and/or languages.
@@ -131,6 +131,7 @@ outside of org-babel, the variable will be
 : (customize-variable 'python-shell-interpreter)
 
 type =M-x : run-python=
+(where =M= stands for =Meta=, which is =Alt=)
 and the shell (the CPython shell) starts.
 
 If somehow, somewhere the interpreter already started —
@@ -149,11 +150,11 @@ a =zsh= prompt on the very same command line and
 Python is often said to be an interpreted programming
 language, but a language is not "interpreted" or "compiled"
 as such. A specific implementation can be an interpreter or
-a compiler.  Over simplification, but still: when a program
+a compiler.  Over-simplification, but still: when a program
 is run, every line of code feeds, in sequence, the
 interpreter/compiler which translates the program into
 byte-code.  The last step generates files, landing in the
-=__pycache__= a folder which in turn contains =.pyc= files extensions 
+=__pycache__= folder which in turn contains =.pyc= files extensions 
 named after your program. You can completely ignore that folder,
 the interpreter will manage it.
 
@@ -389,7 +390,7 @@ the expected output, the error might be silenced,
 or displayed in the =*Org-Babel Error Output*= buffer.
 In the first block, changing the variable to n="3"
 will raise an error in the second block,
-wich in turn won't provide any result.
+which in turn won't provide any result.
 The error appears in the =*Python*= buffer,
 but it's not the best place to investigate.
 Changing the =:results= from =value= to =output=
@@ -416,12 +417,6 @@ the results in the proper buffers.
   sys.stdout.flush()
 
 #+end_src
-
-#+RESULTS:
-: 1..2
-None
-None
-
 
 #+begin_src python
   import random 
@@ -482,7 +477,6 @@ None
 11 121 | 1331
 #+end_example
 
-
 ** Formatting tables
 and adding a prologue header
 
@@ -501,8 +495,8 @@ A basic table output can be return by value
 
 
 the =:prologue= attributes can be used to insert something before the
-result it requires however the result to be an output, so it requires
-a slight modification
+result; It requires however the result to be an output, an so it
+needs a slight modification.
 
 #+Call: Scores2()
 
@@ -573,7 +567,6 @@ Here the origin of the =*this*= should be investigated
 |Oliver  |   2 |   5 |   3
 |Bear    |   5 |  12 |  18
 |Duke    |  12 |  18 |   6
-
 
 * Lambda expressions
 #+begin_src python :session :results var
@@ -750,8 +743,6 @@ non-session output :
 : True
 : __del__
 
-
-
 ** Generic Function /single dispatch/
 Java-like Polymorphism with decorators
 #+name: single_dispatch
@@ -779,6 +770,21 @@ Java-like Polymorphism with decorators
 #+RESULTS: single_dispatch
 : ('default', 'default', 'for a number', 'for a an objet C')
 : dict_keys([<class 'object'>, <class 'float'>, <class 'int'>, <class '__main__.C'>])
+
+** Converting a raw dictionnary to an object
+#+begin_src python
+class Struct:
+    def __init__(_,rawdat) :
+        _.__dict__ = rawdat
+        for k,v in rawdat.items() :
+            if isinstance(v,dict):
+                _.__dict__[k] = Struct(v)
+            if isinstance(v,list):
+                if all(type(x) is dict for x in v):
+                    _.__dict__[k] = [Struct(i) for i in v]
+                else:
+                    _.__dict__[k] = v
+#+end_src
 
 * org-tables
 
@@ -1337,7 +1343,7 @@ thismodule = DEFAULT_MODULE
 IGL = __import__(thismodule)
 t = Thread(target=IGL.start)
 t.start()
-# interpreter goes
+# r goes
 # and we can give it new values
 # read by the simulation
 #+end_src
@@ -1584,6 +1590,36 @@ print(timeit.timeit(lambda:get_datasets(idPattern=1, labelPattern=2, notesPatter
 print(timeit.timeit(lambda:get_datasets0(idPattern=1, labelPattern=2, notesPattern=3)))
 #+end_src
 
+* yield from
+
+=yield from= can be used to delegate iteration
+#+begin_src python :results output
+  def countdown(n):
+      while n > 0:
+          yield n
+          n -= 1
+
+  def countup(stop):
+      n = 1
+      while n < stop:
+          yield n
+          n += 1
+
+  def up_and_down(n):
+      yield from countup(n)
+      yield from countdown(n)
+
+  for x in up_and_down(3) :
+      print(x)
+#+end_src
+
+#+RESULTS:
+: 1
+: 2
+: 3
+: 2
+: 1
+
 * Maximum Nesting Depth of the Parentheses
 https://yewtu.be/watch?v=zrOIQEN3Wkk
 #+begin_src python 
@@ -1597,3 +1633,5 @@ return max(list(scan(operator.add, 0, [(1 if x=="(" else -1) for x in re.findall
 
 #+RESULTS:
 : 3
+
+* hexadecimal prin
