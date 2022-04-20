@@ -17,9 +17,9 @@ This guide features some of the interactions =org-babel= provides over
 code source blocks.  It was initially written with Emacs 26.3 and
 Org-mode 9.3.6 running on Debian 9 (stretch).
 
-Note that the file isn't intended to be read on github (or briefly)
-as their render of org-mode is incomplete (the following results
-for instance).
+Note that the file isn't intended to be read on github (or briefly) as
+their render of org-mode is incomplete (the following results for
+instance). You can read it in online in different formats on [[https://7d.nz/A-Python-interactive-guide-on-Org-babel.html][7d.nz]].
 
 Present configuration is :
 #+call: org-version()
@@ -31,7 +31,7 @@ Present configuration is :
 :  of 2021-08-04
 #+call:linux-version()
 #+RESULTS:
-: Linux 4.9.0-16-amd64 SMP Debian (2021-07-19) 
+: Linux 4.9.0-16-amd64 SMP Debian (2021-07-19)
 
 
 Typing =C-c C-c= (which means keeping =Control= pressed while typing =c=
@@ -106,13 +106,13 @@ have been rewritten with it.
 
 Now you can check your python system interpreter
 #+name:python.sys.version
-#+begin_src python :results value 
+#+begin_src python :results value
   import sys
   return sys.version
 #+end_src
 
 #+RESULTS: python.sys.version
-: 3.9.1 (default, Jan 11 2021, 16:54:16) 
+: 3.9.1 (default, Jan 11 2021, 16:54:16)
 
 
 If the answer is 2.7, you'll have to make one more
@@ -154,7 +154,7 @@ a compiler.  Over-simplification, but still: when a program
 is run, every line of code feeds, in sequence, the
 interpreter/compiler which translates the program into
 byte-code.  The last step generates files, landing in the
-=__pycache__= folder which in turn contains =.pyc= files extensions 
+=__pycache__= folder which in turn contains =.pyc= files extensions
 named after your program. You can completely ignore that folder,
 the interpreter will manage it.
 
@@ -419,7 +419,7 @@ the results in the proper buffers.
 #+end_src
 
 #+begin_src python
-  import random 
+  import random
   dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
   head = ["Name", "str",  "agi",  "int"]
   fmt1 ="{0:8s}| {1:3s} | {2:3s} | {3:3s}"
@@ -482,8 +482,8 @@ and adding a prologue header
 
 A basic table output can be return by value
 #+Name: Scores
-#+begin_src python 
-  import random 
+#+begin_src python
+  import random
   dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
   head = ["Name", "str",  "agi",  "int"]
   fmt1 ="{0:8s}| {1:3s} | {2:3s} | {3:3s}"
@@ -518,7 +518,7 @@ needs a slight modification.
 #+Name: Scores2
 #+header: :prologue print('#+ATTR_LaTeX: :center nil :align |p{5cm}|l|l|l|')
 #+begin_SRC python :results output raw :exports results :eval yes
-  import random 
+  import random
   dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
   head = "Name", "str",  "agi",  "int"
   fmt1 ="|{0:8s}| {1:3s} | {2:3s} | {3:3s}"
@@ -540,8 +540,8 @@ an other alternative is the =:post= attribute
 
 Here the origin of the =*this*= should be investigated
 #+Name: Scores3
-#+begin_SRC python :results output raw :post attr_wrap(data=*this*) 
-  import random 
+#+begin_SRC python :results output raw :post attr_wrap(data=*this*)
+  import random
   dogs ="Max Charlie Cooper Buddy Jack Rocky Oliver Bear Duke".split()
   head = "Name", "str",  "agi",  "int"
   fmt1 ="|{0:8s}| {1:3s} | {2:3s} | {3:3s}"
@@ -833,7 +833,7 @@ https://docs.python.org/3.4/glossary.html#term-global-interpreter-lock
 : 15
 
 * TODO Magic methods
-see magicmethods.org
+see [[./magicmethods.org][magicmethods.org]]
 * Non blocking logging with thread safety
 
 #+Begin_src python :result output
@@ -1162,12 +1162,9 @@ https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
 
 * Graphics'n Gui
 ** [66%] Tk interlude
-#+CALL: TestCase()
-#+CALL: DefaultBindings()
-#+CALL: tktest()
 #+RESULTS:
 
-**** DONE default bindings 
+**** DONE default bindings
 #+NAME: DefaultBindings
 #+Begin_src python :session :tangle yes
 
@@ -1622,16 +1619,11 @@ print(timeit.timeit(lambda:get_datasets0(idPattern=1, labelPattern=2, notesPatte
 
 * Maximum Nesting Depth of the Parentheses
 https://yewtu.be/watch?v=zrOIQEN3Wkk
-#+begin_src python 
+#+begin_src python
 import re,operator
 s="(+(2*3)+((8)/4))+1"
-def scan(f, state, it): 
-     for x in it: state = f(state, x) 
-       yield state 
+def scan(f, state, it):
+     for x in it: state = f(state, x)
+       yield state
 return max(list(scan(operator.add, 0, [(1 if x=="(" else -1) for x in re.findall("[()]",s)])))
 #+end_src
-
-#+RESULTS:
-: 3
-
-* hexadecimal prin
