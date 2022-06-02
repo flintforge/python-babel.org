@@ -256,9 +256,10 @@ the name of an existing function
 for the scope it was defined.
 
 #+begin_src python
-def proceeed() :
-  def open(file) :
-     print("opening %s" % file)
+
+def proceeed():
+  def open(file):
+    print("opening %s" % file)
 #+end_src
 
 Yes, it's possible to define functions inside of functions
@@ -333,7 +334,7 @@ and the result will keep increasing.
 
 * Memo noweb
 
-#+NAME:callthat
+#+NAME: callthat
 #+begin_src python :var n=77
 return n*2
 #+end_src
@@ -350,6 +351,8 @@ with its own scope and variable namespace
 <<callthat>>
 return n
 #+end_src
+
+#+RESULTS:
 
 #+name: F
 #+begin_src python :results append
@@ -1070,7 +1073,7 @@ Every objects has a __sizeof__() function.
 
 
 10 biggest objects
-#+Name:Snapshot1
+#+Name: Snapshot1
 #+begin_src python :session :results value
   import tracemalloc
   tracemalloc.start()
@@ -1084,7 +1087,7 @@ Every objects has a __sizeof__() function.
 #+end_src
 
 Memory leak search :
-#+Name:Snapshot2
+#+Name: Snapshot2
 #+begin_src python :session :results value
   import tracemalloc
   tracemalloc.start()
@@ -1289,16 +1292,6 @@ https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz.asc
       root.mainloop()
       True
 #+end_src
-
-#+RESULTS: Tktest
-:
-: ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... >>> ... ... ... ... ... ... ... ... ... >>> ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... >>> >>> ... >>> >>> ... ... ... ... ... ... ... ... >>> ... ... >>> ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ... ''
-: ''
-: Traceback (most recent call last):
-:   File "<stdin>", line 5, in <module>
-: NameError: name 'Esc' is not defined
-
-#+RESULTS:
 **** The tk color picker
 how to gracefully extend that program so the selected color is tried
 and tested before it is applied?  It sounds simple at first, but this
