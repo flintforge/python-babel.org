@@ -200,7 +200,7 @@ is expressed with =f()=.
 
 Python variables are dynamically typed.  Any variable can
 hold any type from any variable, and — along with its value — the
-type it holds changes during the execution of the program.
+type it holds can change during the execution of the program.
 We talk about /binding/ variables.
 
 Asking for an undefined variable /raise/ an error :
@@ -434,27 +434,26 @@ the results in the proper buffers.
 
 ** Formatting example : tables of squares and cubes
 
-#+Begin_src python :results output
+  #+Begin_src python :results output
+print(' {4:2s}    {0:5s} {1:7s}{2:4s}  {3:10s}'.format('x','x^2','~ko','x^3','n'))
 
-  print(' {4:2s}    {0:5s} {1:7s}{2:4s}  {3:10s}'.format('x','x^2','ko','x^3','n'))
+for n in range(0, 11):
+    x=2<<n
+    print('{4:2d} {0:5d} {1:7d} {2:4d}{3:12d}'.format(x,x**2,int(x**2/1024),x**3,n))
 
-  for n in range(0, 11):
-       x=2<<n
-       ko=int(x**2/1024)
-       print('{4:2d} {0:5d} {1:7d} {2:4d}{3:12d}'.format(x,x**2,ko,x**3,n))
+print('-'*33)
+# right justify as string (through repr or str)
+for x in range(1, 12):
+    print(repr(x).rjust(2), repr(x*x).rjust(3), end=' | ')
+    # Note use of 'end' on previous line, instead of '\n' by default
+    print(repr(x**3).rjust(4))
 
-  print('-'*33)
-  # right justify as string (through repr or str)
-  for x in range(1, 12):
-       print(repr(x).rjust(2), repr(x*x).rjust(3), end=' | ')
-       # Note use of 'end' on previous line, instead of '\n' by default
-       print(repr(x**3).rjust(4))
-
-#+end_src
+     
+  #+end_src
 
 #+RESULTS:
 #+begin_example
- n     x     x^2    ko    x^3
+ n     x     x^2    ~ko   x^3       
  0     2       4    0           8
  1     4      16    0          64
  2     8      64    0         512
@@ -896,7 +895,7 @@ print('?')
 * reading the standard output
 
 #+Begin_src python :session tools :results output
-# http://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python?rq=1
+  # http://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python
   import sys
   from subprocess import PIPE, Popen
   from threading  import Thread
@@ -931,6 +930,7 @@ print('?')
 #+end_src
 
 * strftime reference
+
 Note: Examples are based on datetime.datetime(2013, 9, 30, 7, 6, 5)
 | Code | Meaning                                                           |                  Example |
 | %a   | Weekday as locale’s abbreviated name.                             |                      Mon |
@@ -970,6 +970,13 @@ Note: Examples are based on datetime.datetime(2013, 9, 30, 7, 6, 5)
 | %X   | Locale’s appropriate time representation.                         |                 07:06:05 |
 | %%   | A literal '%' character.                                          |                        % |
 
+#+begin_src python :results value
+from datetime import datetime
+return datetime.now().strftime("%Y-%m-%d+%H:%M:%S")
+#+end_src
+
+#+RESULTS:
+: 2022-06-21+23:42:42
 
 #+begin_src python :results output
 from time import time
